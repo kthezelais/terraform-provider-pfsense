@@ -478,20 +478,24 @@ func (pf *Client) getGateways(ctx context.Context) (*Gateways, error) {
 	return &gateways, nil
 }
 
-// getGatewayEditID returns the index into get_gateways(GW_CACHE_INDEXED)
-// for the given gateway name. The edit page (system_gateways_edit.php) and
-// validate_gateway() use this index, which differs from the config.xml
-// array index when gateways are reordered by get_gateways().
+// getGatewayEditID returns the index used by the gateway GUI, not the raw
+// config.xml index. CE 2.7 uses return_gateways_array; newer versions use
+// get_gateways(GW_CACHE_INDEXED). Preserve the actual PHP array keys.
 func (pf *Client) getGatewayEditID(ctx context.Context, name string) (*int, error) {
 	type gwIndexEntry struct {
+		ID   int    `json:"id"`
 		Name string `json:"name"`
 	}
 
 	command := "require_once('gwlb.inc');" +
-		"refresh_gateways();" +
+		"if (function_exists('get_gateways') && defined('GW_CACHE_INDEXED')) {" +
+		"if (function_exists('refresh_gateways')) { refresh_gateways(); }" +
 		"$a = get_gateways(GW_CACHE_INDEXED);" +
+		"} elseif (function_exists('return_gateways_array')) {" +
+		"$a = return_gateways_array(true, false, true, true);" +
+		"} else { throw new Exception('Unsupported pfSense gateway API'); }" +
 		"$out = array();" +
-		"foreach ($a as $k => $v) { $out[] = array('name' => $v['name']); }" +
+		"foreach ($a as $k => $v) { $out[] = array('id' => (int)$k, 'name' => $v['name']); }" +
 		"print(json_encode($out));"
 
 	var entries []gwIndexEntry
@@ -499,9 +503,9 @@ func (pf *Client) getGatewayEditID(ctx context.Context, name string) (*int, erro
 		return nil, err
 	}
 
-	for i, entry := range entries {
+	for _, entry := range entries {
 		if entry.Name == name {
-			return &i, nil
+			return &entry.ID, nil
 		}
 	}
 

@@ -252,7 +252,12 @@ func parseFirewallRuleResponse(resp firewallRuleResponse) (FirewallRule, error) 
 		return r, err
 	}
 
-	if err := r.SetIPProtocol(resp.IPProtocol); err != nil {
+	// Older wizard-generated rules omit ipprotocol; pfSense treats them as IPv4.
+	ipProtocol := resp.IPProtocol
+	if ipProtocol == "" {
+		ipProtocol = "inet"
+	}
+	if err := r.SetIPProtocol(ipProtocol); err != nil {
 		return r, err
 	}
 
@@ -290,7 +295,12 @@ func parseFirewallRuleResponse(resp firewallRuleResponse) (FirewallRule, error) 
 }
 
 func (pf *Client) getFirewallRules(ctx context.Context) (*FirewallRules, error) {
-	command := "$output = array();" +
+	// The GUI sorts and reindexes rules before handling edit/delete requests.
+	// Resolve control IDs from that same order, never the raw config.xml order.
+	// This only sorts the request-local config; it does not persist a change.
+	command := "require_once('filter.inc');" +
+		"filter_rules_sort();" +
+		"$output = array();" +
 		"if (isset($config['filter']['rule']) && is_array($config['filter']['rule'])) {" +
 		"foreach ($config['filter']['rule'] as $k => $v) {" +
 		"$v['controlID'] = $k; array_push($output, $v);" +
@@ -559,9 +569,15 @@ func (pf *Client) DeleteFirewallRule(ctx context.Context, tracker string) error 
 	}
 
 	relativeURL := url.URL{Path: "firewall_rules.php"}
+	rule, err := rules.GetByTracker(tracker)
+	if err != nil {
+		return fmt.Errorf("%w firewall rule, %w", ErrDeleteOperationFailed, err)
+	}
+
 	values := url.Values{
 		"act": {"del"},
 		"id":  {strconv.Itoa(*controlID)},
+		"if":  {rule.Interface},
 	}
 
 	_, err = pf.callHTML(ctx, http.MethodPost, relativeURL, &values)
