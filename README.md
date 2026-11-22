@@ -1,7 +1,8 @@
 # Terraform Provider for pfSense
 
 > This fork contains CE 2.7 compatibility and firewall lifecycle fixes.
-> See [FORK.md](FORK.md) for changes, regression tests, and local installation.
+> See [FORK.md](FORK.md) for changes, tests, and [PUBLISHING.md](PUBLISHING.md)
+> for signed GitHub releases and Terraform Registry installation.
 
 Configure [pfSense](https://www.pfsense.org/) firewalls with Terraform. Manages firewall rules, aliases, gateways, DNS resolver, DHCP, IPsec VPN, interfaces, VLANs, system settings, users, and more through the pfSense web UI.
 
@@ -26,8 +27,8 @@ Validated with pfSense CE. Compatibility with pfSense Plus is not guaranteed.
 terraform {
   required_providers {
     pfsense = {
-      source  = "emanuelbesliu/pfsense"
-      version = "~> 0.43"
+      source  = "kthezelais/pfsense"
+      version = "0.58.1"
     }
   }
 }

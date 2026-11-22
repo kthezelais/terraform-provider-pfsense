@@ -16,7 +16,7 @@ var version = "dev"
 
 func main() {
 	err := providerserver.Serve(context.Background(), provider.New(version), providerserver.ServeOpts{
-		Address: "registry.terraform.io/emanuelbesliu/pfsense",
+		Address: "registry.terraform.io/kthezelais/pfsense",
 	})
 	if err != nil {
 		log.Fatal(err)

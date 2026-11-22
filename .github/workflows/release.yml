@@ -28,6 +28,11 @@ jobs:
         with:
           go-version-file: ".go-version"
 
+      - name: Test and vet
+        run: |
+          go test ./...
+          go vet ./...
+
       - name: Import GPG key
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v7
@@ -46,3 +51,4 @@ jobs:
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PASSPHRASE: ${{ secrets.PASSPHRASE }}

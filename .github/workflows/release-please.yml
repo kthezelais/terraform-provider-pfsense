@@ -1,7 +1,6 @@
+# Fork releases are tagged explicitly after tests, not auto-published on push.
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -28,3 +27,4 @@ jobs:
     uses: ./.github/workflows/release.yml
     secrets:
       GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      PASSPHRASE: ${{ secrets.PASSPHRASE }}

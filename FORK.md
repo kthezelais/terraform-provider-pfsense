@@ -1,7 +1,8 @@
 # Local CE 2.7 compatibility fixes
 
 This fork is based on `emanuelbesliu/pfsense` v0.58.0 (commit `f16c920`).
-It is not an official Netgate provider or a separately published Registry release.
+It is not an official Netgate provider. See [PUBLISHING.md](PUBLISHING.md) for
+signed GitHub releases and the required Terraform Registry registration.
 
 ## Changes
 
@@ -69,8 +70,9 @@ other CLI configuration while the environment variable is set; merge existing
 settings if needed. Run `unset TF_CLI_CONFIG_FILE` to stop selecting the fork.
 
 The Go module path is intentionally unchanged to avoid unrelated import churn.
-Publishing a provider under `kthezelais/pfsense` requires a separate release and
-Registry setup; do not simply change the Terraform source address yet.
+Publishing under `kthezelais/pfsense` uses the signed release workflow and
+Registry setup described in [PUBLISHING.md](PUBLISHING.md). Do not change the
+Terraform source until that registration is complete.
 
 ## Live-test precautions
 
